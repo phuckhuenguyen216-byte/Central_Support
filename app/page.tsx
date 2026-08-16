@@ -53,16 +53,19 @@ export default function Home() {
         <div className="container headerMain">
           <Logo />
           <nav className="headerNav">
-            <a href="#products" onClick={(e) => { e.preventDefault(); setActiveCategory("public"); }}>
-              {lang === "vi" ? "Sản phẩm & Dịch vụ" : "Products & Services"}
+            <a href="#products" onClick={(e) => e.preventDefault()}>
+              {lang === "vi" ? "Sản phẩm" : "Products"}
             </a>
-            <a href="#bidding" onClick={(e) => { e.preventDefault(); setActiveCategory("data"); }}>
-              {lang === "vi" ? "Hệ thống Đấu thầu" : "Bidding Systems"}
+            <a href="#solutions" onClick={(e) => e.preventDefault()}>
+              {lang === "vi" ? "Giải pháp" : "Solutions"}
             </a>
-            <a href="#community" onClick={(e) => { e.preventDefault(); setActiveCategory("social"); }}>
-              {lang === "vi" ? "Cộng đồng SVUIT" : "Community SVUIT"}
+            <a href="#partners" onClick={(e) => e.preventDefault()}>
+              {lang === "vi" ? "Đối tác" : "Partners"}
             </a>
-            <a href="#contact" onClick={(e) => { e.preventDefault(); alert(lang === "vi" ? "Email hỗ trợ: support@poptech.vn" : "Support Email: support@poptech.vn"); }}>
+            <a href="#company" onClick={(e) => e.preventDefault()}>
+              {lang === "vi" ? "Doanh nghiệp" : "Company"}
+            </a>
+            <a href="#contact" onClick={(e) => e.preventDefault()}>
               {lang === "vi" ? "Liên hệ" : "Contact Us"}
             </a>
           </nav>
