@@ -8,11 +8,17 @@ import { portalLinks, PortalLink } from "@/lib/portalData";
 
 export default function AdminPage() {
   const { lang, setLang } = useLanguage();
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [links, setLinks] = useState<PortalLink[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingLink, setEditingLink] = useState<PortalLink | null>(null);
 
-  // Form states
+  // Login states
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [loginError, setLoginError] = useState("");
+
+  // Form states for managing links
   const [formName, setFormName] = useState("");
   const [formNameEn, setFormNameEn] = useState("");
   const [formUrl, setFormUrl] = useState("");
@@ -20,6 +26,14 @@ export default function AdminPage() {
   const [formPurpose, setFormPurpose] = useState("");
   const [formPurposeEn, setFormPurposeEn] = useState("");
   const [formIcon, setFormIcon] = useState("globe");
+
+  // Check login session on mount
+  useEffect(() => {
+    const authSession = sessionStorage.getItem("sz_admin_auth");
+    if (authSession === "true") {
+      setIsLoggedIn(true);
+    }
+  }, []);
 
   // Load links from localStorage on mount
   useEffect(() => {
@@ -35,7 +49,31 @@ export default function AdminPage() {
     }
   }, []);
 
-  // Save links to state and localStorage
+  // Handle credentials check submit
+  const handleLoginSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (username.trim() === "poptech_admin" && password === "poptech@support2026") {
+      sessionStorage.setItem("sz_admin_auth", "true");
+      setIsLoggedIn(true);
+      setLoginError("");
+      setUsername("");
+      setPassword("");
+    } else {
+      setLoginError(
+        lang === "vi"
+          ? "Tên đăng nhập hoặc mật khẩu không chính xác!"
+          : "Invalid username or password!"
+      );
+    }
+  };
+
+  // Handle Logout
+  const handleLogout = () => {
+    sessionStorage.removeItem("sz_admin_auth");
+    setIsLoggedIn(false);
+  };
+
+  // Save links database utility
   const saveLinks = (updatedLinks: PortalLink[]) => {
     setLinks(updatedLinks);
     localStorage.setItem("sz_portal_links", JSON.stringify(updatedLinks));
@@ -89,7 +127,6 @@ export default function AdminPage() {
         return link;
       });
       saveLinks(updated);
-      alert("Đã cập nhật liên kết thành công!");
     } else {
       // Add mode
       const newId = links.length > 0 ? Math.max(...links.map((l) => l.id)) + 1 : 1;
@@ -105,7 +142,6 @@ export default function AdminPage() {
         isLocked: false,
       };
       saveLinks([...links, newLink]);
-      alert("Đã thêm liên kết mới thành công!");
     }
 
     setIsModalOpen(false);
@@ -115,8 +151,7 @@ export default function AdminPage() {
   const handleToggleLock = (id: number) => {
     const updated = links.map((link) => {
       if (link.id === id) {
-        const nextState = !link.isLocked;
-        return { ...link, isLocked: nextState };
+        return { ...link, isLocked: !link.isLocked };
       }
       return link;
     });
@@ -125,7 +160,11 @@ export default function AdminPage() {
 
   // Delete a link
   const handleDeleteLink = (id: number) => {
-    if (confirm("Bạn có chắc chắn muốn xóa liên kết này? (Are you sure you want to delete this link?)")) {
+    const confirmMsg =
+      lang === "vi"
+        ? "Bạn có chắc chắn muốn xóa liên kết này?"
+        : "Are you sure you want to delete this link?";
+    if (confirm(confirmMsg)) {
       const updated = links.filter((link) => link.id !== id);
       saveLinks(updated);
     }
@@ -133,11 +172,77 @@ export default function AdminPage() {
 
   // Reset to default spreadsheet database
   const handleResetData = () => {
-    if (confirm("Reset về dữ liệu gốc từ Google Sheet? (Reset to default Google Sheet data?)")) {
+    const confirmMsg =
+      lang === "vi"
+        ? "Khôi phục lại dữ liệu gốc ban đầu từ Google Sheet?"
+        : "Reset to default database from Google Sheets?";
+    if (confirm(confirmMsg)) {
       saveLinks(portalLinks);
     }
   };
 
+  // 1. RENDER ADMIN LOGIN PAGE (If not authenticated)
+  if (!isLoggedIn) {
+    return (
+      <div className="adminPageWrapper loginScreen">
+        <div className="portalBgGrid" />
+        <div className="portalBgGlow pg1" />
+        <div className="portalBgGlow pg2" />
+
+        <div className="loginCardContainer">
+          <div className="loginCard">
+            <div className="loginCardHeader">
+              <Logo />
+              <h2>{lang === "vi" ? "Đăng nhập Quản trị" : "Admin Authentication"}</h2>
+              <p>
+                {lang === "vi"
+                  ? "Nhập tài khoản để truy cập chức năng điều khiển liên kết."
+                  : "Please input credentials to manage Central Portal database."}
+              </p>
+            </div>
+
+            <form onSubmit={handleLoginSubmit} className="loginForm">
+              {loginError && <div className="loginErrorMessage">⚠️ {loginError}</div>}
+              
+              <label>
+                {lang === "vi" ? "Tên tài khoản (Username)" : "Username"}
+                <input
+                  type="text"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  placeholder="E.g., poptech_admin"
+                  required
+                />
+              </label>
+
+              <label>
+                {lang === "vi" ? "Mật khẩu (Password)" : "Password"}
+                <input
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="••••••••••••"
+                  required
+                />
+              </label>
+
+              <button type="submit" className="primaryBtn loginSubmitBtn">
+                {lang === "vi" ? "Xác nhận Đăng nhập" : "Sign In Console"}
+              </button>
+            </form>
+
+            <div className="loginCardFooter">
+              <Link href="/">
+                ← {lang === "vi" ? "Quay lại trang chính" : "Back to Home Portal"}
+              </Link>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // 2. RENDER FULL BEAUTIFUL ADMIN CONTROL PANEL (If authenticated)
   return (
     <div className="adminPageWrapper">
       {/* Background grids */}
@@ -165,10 +270,15 @@ export default function AdminPage() {
                 EN
               </button>
             </div>
-            {/* Back button */}
-            <Link href="/" className="backPortalBtn">
-              ← {lang === "vi" ? "Về Website chính" : "Back to Website"}
-            </Link>
+            {/* Logout button */}
+            <button onClick={handleLogout} className="adminLogoutBtn">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2.5">
+                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                <polyline points="16 17 21 12 16 7" />
+                <line x1="21" y1="12" x2="9" y2="12" />
+              </svg>
+              <span>{lang === "vi" ? "ĐĂNG XUẤT" : "LOGOUT"}</span>
+            </button>
           </div>
         </div>
       </header>
@@ -177,11 +287,11 @@ export default function AdminPage() {
       <main className="container adminDashboard">
         <div className="adminDashboardHead">
           <div>
-            <h1>{lang === "vi" ? "Quản lý liên kết" : "Links Administration"}</h1>
+            <h1>{lang === "vi" ? "Trang quản trị Central Control" : "Central Portal Console"}</h1>
             <p>
               {lang === "vi"
-                ? "Thêm, sửa, xóa, khóa trạng thái hiển thị của 18 liên kết nội bộ công ty."
-                : "Add, edit, delete, or toggle lock status of the company internal links."}
+                ? "Thêm, chỉnh sửa, xóa và khóa trạng thái liên kết hiển thị trên trang chủ."
+                : "Add, edit, remove or toggle display lock for portal shortcuts in real-time."}
             </p>
           </div>
           <div className="adminDashboardActions">
@@ -223,7 +333,9 @@ export default function AdminPage() {
                     <td><b>{link.id}</b></td>
                     <td>
                       <div className="adminTableNameCell">
-                        <span className="adminTableIcon">{link.icon}</span>
+                        <span className="adminTableIcon">
+                          {link.icon === "check" ? "✓" : link.icon === "cpu" ? "⚙" : "🌐"}
+                        </span>
                         <div>
                           <strong>{lang === "vi" ? link.name : link.nameEn}</strong>
                           <small>{lang === "vi" ? link.nameEn : link.name}</small>

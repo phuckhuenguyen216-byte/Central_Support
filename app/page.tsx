@@ -48,38 +48,65 @@ export default function Home() {
       <div className="portalBgGlow pg1" />
       <div className="portalBgGlow pg2" />
 
-      {/* HEADER NAVBAR */}
+      {/* HEADER NAVBAR (SOPHOS STYLE) */}
       <header className="portalHeader">
-        <div className="container headerInner">
+        <div className="container headerMain">
           <Logo />
+          <nav className="headerNav">
+            <a href="#products" onClick={(e) => { e.preventDefault(); setActiveCategory("public"); }}>
+              {lang === "vi" ? "Sản phẩm & Dịch vụ" : "Products & Services"}
+            </a>
+            <a href="#bidding" onClick={(e) => { e.preventDefault(); setActiveCategory("data"); }}>
+              {lang === "vi" ? "Hệ thống Đấu thầu" : "Bidding Systems"}
+            </a>
+            <a href="#community" onClick={(e) => { e.preventDefault(); setActiveCategory("social"); }}>
+              {lang === "vi" ? "Cộng đồng SVUIT" : "Community SVUIT"}
+            </a>
+            <a href="#contact" onClick={(e) => { e.preventDefault(); alert(lang === "vi" ? "Email hỗ trợ: support@poptech.vn" : "Support Email: support@poptech.vn"); }}>
+              {lang === "vi" ? "Liên hệ" : "Contact Us"}
+            </a>
+          </nav>
+        </div>
 
-          <div className="headerActions">
-            {/* Language Switch Toggle */}
-            <div className="langToggler">
-              <button
-                type="button"
-                className={`langBtn ${lang === "vi" ? "active" : ""}`}
-                onClick={() => setLang("vi")}
+        {/* Sophos Sub-header bar */}
+        <div className="headerSub">
+          <div className="container subInner">
+            <div className="subLeft">
+              <span 
+                className={`homeTab ${activeCategory === "all" ? "active" : ""}`}
+                onClick={() => { setActiveCategory("all"); setSearchQuery(""); }}
               >
-                VI
-              </button>
-              <button
-                type="button"
-                className={`langBtn ${lang === "en" ? "active" : ""}`}
-                onClick={() => setLang("en")}
-              >
-                EN
-              </button>
+                {lang === "vi" ? "TRANG CHỦ" : "HOME"}
+              </span>
             </div>
+            <div className="subRight">
+              {/* Language Switch Toggle */}
+              <div className="langToggler">
+                <button
+                  type="button"
+                  className={`langBtn ${lang === "vi" ? "active" : ""}`}
+                  onClick={() => setLang("vi")}
+                >
+                  VI
+                </button>
+                <button
+                  type="button"
+                  className={`langBtn ${lang === "en" ? "active" : ""}`}
+                  onClick={() => setLang("en")}
+                >
+                  EN
+                </button>
+              </div>
 
-            {/* Admin Console Link Button */}
-            <Link href="/admin" className="adminPortalBtn">
-              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2.5">
-                <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
-                <path d="M7 11V7a5 5 0 0 1 10 0v4" />
-              </svg>
-              <span>{lang === "vi" ? "Quản trị Admin" : "Admin Panel"}</span>
-            </Link>
+              {/* Admin Login Link */}
+              <Link href="/admin" className="adminPortalBtn">
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2.5">
+                  <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+                  <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                </svg>
+                <span>{lang === "vi" ? "ĐĂNG NHẬP" : "LOGIN"}</span>
+              </Link>
+            </div>
           </div>
         </div>
       </header>
