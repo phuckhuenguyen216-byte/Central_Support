@@ -1,69 +1,164 @@
-import Image from "next/image";
+"use client";
+
+import { useState, useEffect } from "react";
+import Link from "next/link";
+import { useLanguage } from "@/lib/LanguageContext";
+import { portalLinks, PortalLink } from "@/lib/portalData";
+import { Logo } from "@/components/Logo";
+import { PortalCard } from "@/components/PortalCard";
+import { PortalSearch } from "@/components/PortalSearch";
 
 export default function Home() {
+  const { lang, setLang } = useLanguage();
+  const [links, setLinks] = useState<PortalLink[]>([]);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [activeCategory, setActiveCategory] = useState("all");
+
+  // Load links from localStorage or import database on mount
+  useEffect(() => {
+    const savedLinks = localStorage.getItem("sz_portal_links");
+    if (savedLinks) {
+      try {
+        setLinks(JSON.parse(savedLinks));
+      } catch (e) {
+        setLinks(portalLinks);
+      }
+    } else {
+      setLinks(portalLinks);
+      localStorage.setItem("sz_portal_links", JSON.stringify(portalLinks));
+    }
+  }, []);
+
+  // Filter links based on active tab and search query
+  const filteredLinks = links.filter((link) => {
+    const matchCategory = activeCategory === "all" || link.category === activeCategory;
+    
+    const query = searchQuery.toLowerCase().trim();
+    const title = (lang === "vi" ? link.name : link.nameEn).toLowerCase();
+    const desc = (lang === "vi" ? link.purpose : link.purposeEn).toLowerCase();
+    const matchSearch = !query || title.includes(query) || desc.includes(query) || link.url.toLowerCase().includes(query);
+
+    return matchCategory && matchSearch;
+  });
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert h-5 w-[100px]"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the{" "}
-            <code className="rounded bg-black/[.06] px-1.5 py-0.5 font-mono text-[0.9em] dark:bg-white/[.08]">
-              page.tsx
-            </code>{" "}
-            file.
+    <div className="portalPageWrapper">
+      {/* Background Decorative Tech Grid and Glows */}
+      <div className="portalBgGrid" />
+      <div className="portalBgGlow pg1" />
+      <div className="portalBgGlow pg2" />
+
+      {/* HEADER NAVBAR */}
+      <header className="portalHeader">
+        <div className="container headerInner">
+          <Logo />
+
+          <div className="headerActions">
+            {/* Language Switch Toggle */}
+            <div className="langToggler">
+              <button
+                type="button"
+                className={`langBtn ${lang === "vi" ? "active" : ""}`}
+                onClick={() => setLang("vi")}
+              >
+                VI
+              </button>
+              <button
+                type="button"
+                className={`langBtn ${lang === "en" ? "active" : ""}`}
+                onClick={() => setLang("en")}
+              >
+                EN
+              </button>
+            </div>
+
+            {/* Admin Console Link Button */}
+            <Link href="/admin" className="adminPortalBtn">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2.5">
+                <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+                <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+              </svg>
+              <span>{lang === "vi" ? "Quản trị Admin" : "Admin Panel"}</span>
+            </Link>
+          </div>
+        </div>
+      </header>
+
+      {/* HERO SECTION */}
+      <section className="portalHero">
+        <div className="container heroInner">
+          <span className="heroKicker">
+            {lang === "vi" ? "MỞ CỬA VÀO HỆ SINH THÁI" : "ECOSYSTEM CONTROL CENTER"}
+          </span>
+          <h1>
+            {lang === "vi"
+              ? "Cổng điều khiển & Hỗ trợ dự án"
+              : "Unified Central Project Console"}
           </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
+          <p>
+            {lang === "vi"
+              ? "Truy cập nhanh chóng, an toàn các hệ thống, kênh truyền thông và bảng theo dõi chỉ số nội bộ của POPTech."
+              : "Quick, secure access to all internal tools, social channels, and project dashboards for POPTech."}
           </p>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert h-[14px] w-4"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+      </section>
+
+      {/* SEARCH AND FILTERS SECTION */}
+      <section className="portalSearchSection">
+        <div className="container">
+          <PortalSearch
+            searchQuery={searchQuery}
+            onSearchChange={setSearchQuery}
+            activeCategory={activeCategory}
+            onCategoryChange={setActiveCategory}
+          />
         </div>
-      </main>
+      </section>
+
+      {/* MAIN CARDS DIRECTORY */}
+      <section className="portalDirectorySection">
+        <div className="container">
+          {filteredLinks.length > 0 ? (
+            <div className="portalCardsGrid">
+              {filteredLinks.map((link) => (
+                <PortalCard key={link.id} link={link} />
+              ))}
+            </div>
+          ) : (
+            <div className="emptyResultsState">
+              <div className="emptyIcon">
+                <svg viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="currentColor" strokeWidth="2">
+                  <circle cx="11" cy="11" r="8" />
+                  <line x1="21" y1="21" x2="16.65" y2="16.65" />
+                  <line x1="8" y1="11" x2="14" y2="11" />
+                </svg>
+              </div>
+              <h3>{lang === "vi" ? "Không tìm thấy liên kết" : "No Links Found"}</h3>
+              <p>
+                {lang === "vi"
+                  ? "Không tìm thấy kết quả phù hợp với từ khóa tìm kiếm của bạn. Hãy thử từ khóa khác!"
+                  : "We couldn't find any links matching your search criteria. Please try another keyword!"}
+              </p>
+              {searchQuery && (
+                <button
+                  type="button"
+                  className="primaryBtn clearBtn"
+                  onClick={() => setSearchQuery("")}
+                >
+                  {lang === "vi" ? "Xóa bộ lọc tìm kiếm" : "Clear Search Filter"}
+                </button>
+              )}
+            </div>
+          )}
+        </div>
+      </section>
+
+      {/* FOOTER */}
+      <footer className="portalFooter">
+        <div className="container footerInner">
+          <p>© 2026 POPTech. All rights reserved. Powered by Next.js & Tailwind-ready aesthetics.</p>
+        </div>
+      </footer>
     </div>
   );
 }
