@@ -821,7 +821,10 @@ body {
 }
 
 .adminTable th {
-  background: rgba(255, 255, 255, 0.02);
+  position: sticky;
+  top: 68px;
+  z-index: 10;
+  background: #0c121d; /* Solid dark background matching the card body */
   border-bottom: 1px solid var(--card-border);
   padding: 18px 24px;
   font-weight: 800;
