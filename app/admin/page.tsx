@@ -336,11 +336,11 @@ export default function AdminPage() {
   // 1. RENDER ADMIN LOGIN PAGE (If not authenticated)
   if (!isLoggedIn) {
     return (
-      <div className="portalPageWrapper adminLoginPage">
+      <div className="portalPageWrapper loginScreen">
         <div className="portalBgGrid" />
         <div className="portalBgGlow pg1" />
 
-        <div className="loginContainer">
+        <div className="loginCardContainer">
           <div className="loginCard">
             <div className="loginCardHeader">
               <Logo />
