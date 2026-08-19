@@ -119,6 +119,8 @@ export function PortalCard({ link }: { link: PortalLink }) {
   // Use a different color accent for locked states
   const accentColor = link.isLocked ? "rgba(107, 114, 128, 0.4)" : "#ec1c6b";
 
+  const isCustomIcon = link.icon && (link.icon.startsWith("http://") || link.icon.startsWith("https://") || link.icon.startsWith("data:"));
+
   return (
     <div
       className={`portalCard ${link.isLocked ? "locked" : ""}`}
@@ -129,7 +131,15 @@ export function PortalCard({ link }: { link: PortalLink }) {
 
       <div className="cardTop">
         <div className="cardIcon">
-          <LinkIcon name={link.icon} color={link.isLocked ? "#6b7280" : "url(#portalGrad)"} />
+          {isCustomIcon ? (
+            <img 
+              src={link.icon} 
+              alt={title} 
+              style={{ width: "24px", height: "24px", objectFit: "contain", borderRadius: "4px", filter: link.isLocked ? "grayscale(1)" : "none" }} 
+            />
+          ) : (
+            <LinkIcon name={link.icon} color={link.isLocked ? "#6b7280" : "url(#portalGrad)"} />
+          )}
         </div>
         
         {/* Status indicator badges */}

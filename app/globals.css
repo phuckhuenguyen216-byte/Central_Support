@@ -11,6 +11,56 @@
   --text-muted: #9ca3af;
   --sophos-blue: #0054a6;
   --sophos-dark: #002f6c;
+  
+  /* Theme-specific variables */
+  --title-color: #ffffff;
+  --btn-bg: rgba(255, 255, 255, 0.03);
+  --btn-border: rgba(255, 255, 255, 0.05);
+  --btn-text: #9ca3af;
+  --admin-bg: #06090e;
+  --admin-reset-btn-bg: rgba(255, 255, 255, 0.05);
+  --admin-reset-btn-border: rgba(255, 255, 255, 0.1);
+  --admin-reset-btn-text: #d1d5db;
+  --admin-th-bg: #0c121d;
+  --admin-td-border: rgba(255, 255, 255, 0.04);
+  --admin-td-text: #e5e7eb;
+  --modal-card-bg: #0f172a;
+  --modal-input-bg: rgba(0, 0, 0, 0.25);
+  --modal-input-border: rgba(255, 255, 255, 0.08);
+}
+
+:root[data-theme="light"] {
+  --background: #f8fafc;
+  --foreground: #334155;
+  --card-bg: rgba(255, 255, 255, 0.85);
+  --card-border: rgba(15, 23, 42, 0.06);
+  --text-muted: #64748b;
+  
+  /* Light mode theme specific variables */
+  --title-color: #0f172a;
+  --btn-bg: rgba(15, 23, 42, 0.03);
+  --btn-border: rgba(15, 23, 42, 0.06);
+  --btn-text: #475569;
+  --admin-bg: #f1f5f9;
+  --admin-reset-btn-bg: rgba(15, 23, 42, 0.03);
+  --admin-reset-btn-border: rgba(15, 23, 42, 0.08);
+  --admin-reset-btn-text: #475569;
+  --admin-th-bg: #e2e8f0;
+  --admin-td-border: rgba(15, 23, 42, 0.05);
+  --admin-td-text: #1e293b;
+  --modal-card-bg: #ffffff;
+  --modal-input-bg: rgba(15, 23, 42, 0.02);
+  --modal-input-border: rgba(15, 23, 42, 0.08);
+}
+
+:root[data-theme="light"] .portalBgGrid {
+  background-image:
+    linear-gradient(rgba(15, 23, 42, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(15, 23, 42, 0.03) 1px, transparent 1px);
+}
+
+:root[data-theme="light"] .portalBgGlow {
+  opacity: 0.08;
 }
 
 body {
@@ -179,7 +229,27 @@ body {
   gap: 16px;
 }
 
-/* Language switch */
+/* Language switch & Theme toggle */
+.themeToggleBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #fff;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.themeToggleBtn:hover {
+  background: rgba(255, 255, 255, 0.15);
+  color: #fbbf24;
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
 .langToggler {
   display: flex;
   background: rgba(255, 255, 255, 0.08);
@@ -258,7 +328,7 @@ body {
   font-size: 40px;
   font-weight: 950;
   letter-spacing: -0.5px;
-  color: #fff;
+  color: var(--title-color);
   margin-bottom: 16px;
 }
 
@@ -315,7 +385,7 @@ body {
   flex: 1;
   background: none;
   border: none;
-  color: #fff;
+  color: var(--foreground);
   font-size: 15px;
   outline: none;
 }
@@ -340,7 +410,14 @@ body {
 /* Category sliding tabs */
 .categoriesTabsWrapper {
   display: flex;
-  justify-content: center;
+  overflow-x: auto;
+  padding: 4px 0;
+  scrollbar-width: none; /* Hide scrollbar Firefox */
+  -webkit-overflow-scrolling: touch;
+}
+
+.categoriesTabsWrapper::-webkit-scrollbar {
+  display: none; /* Hide scrollbar Chrome/Safari */
 }
 
 .categoriesTabs {
@@ -350,38 +427,80 @@ body {
   border-radius: 14px;
   padding: 4px;
   position: relative;
-  overflow: hidden;
+  gap: 4px;
 }
 
 .categoryTabBtn {
   font-size: 12.5px;
   font-weight: 750;
-  padding: 8px 18px;
+  padding: 8px 16px;
   border-radius: 10px;
   cursor: pointer;
   color: var(--text-muted);
-  transition: color 0.3s;
+  transition: color 0.2s, background-color 0.2s, box-shadow 0.2s;
   border: none;
-  background: none;
+  background: transparent;
   position: relative;
   z-index: 2;
   white-space: nowrap;
 }
 
+/* Active style on mobile: applied directly to the button */
 .categoryTabBtn.active {
   color: #fff;
+  background: var(--pink);
+  box-shadow: 0 4px 12px rgba(236, 28, 107, 0.35);
 }
 
+/* Hide the sliding highlight on mobile */
 .categoryTabHighlight {
-  position: absolute;
-  top: 4px;
-  bottom: 4px;
-  left: 4px;
-  background: var(--pink);
-  border-radius: 10px;
-  z-index: 1;
-  transition: transform 0.35s cubic-bezier(0.25, 1, 0.5, 1);
-  box-shadow: 0 4px 15px rgba(236, 28, 107, 0.4);
+  display: none;
+}
+
+/* Desktop and Tablet styles */
+@media (min-width: 640px) {
+  .categoriesTabsWrapper {
+    display: block;
+    width: 100%;
+    overflow: visible;
+  }
+
+  .categoriesTabs {
+    display: flex;
+    width: 100%;
+    max-width: 980px;
+    margin: 0 auto;
+    gap: 0;
+  }
+
+  .categoryTabBtn {
+    flex: 1;
+    text-align: center;
+    min-width: 0;
+    padding: 8px 4px;
+    font-size: 11.5px;
+    letter-spacing: 0.2px;
+  }
+
+  /* On desktop, remove direct button active background because we use the sliding highlight */
+  .categoryTabBtn.active {
+    background: transparent;
+    box-shadow: none;
+  }
+
+  /* Show the sliding highlight on desktop */
+  .categoryTabHighlight {
+    display: block;
+    position: absolute;
+    top: 4px;
+    bottom: 4px;
+    left: 4px;
+    background: var(--pink);
+    border-radius: 10px;
+    z-index: 1;
+    transition: transform 0.35s cubic-bezier(0.25, 1, 0.5, 1);
+    box-shadow: 0 4px 15px rgba(236, 28, 107, 0.4);
+  }
 }
 
 /* ==========================================================================
@@ -490,7 +609,7 @@ body {
 .cardBody h3 {
   font-size: 18px;
   font-weight: 850;
-  color: #fff;
+  color: var(--title-color);
   margin-bottom: 8px;
 }
 
@@ -557,7 +676,7 @@ body {
 .emptyResultsState h3 {
   font-size: 18px;
   font-weight: 800;
-  color: #fff;
+  color: var(--title-color);
   margin-bottom: 8px;
 }
 
@@ -609,9 +728,9 @@ body {
 }
 
 .loginCard {
-  background: rgba(15, 23, 42, 0.85);
+  background: var(--modal-card-bg);
   backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--card-border);
   border-radius: 24px;
   padding: 40px;
   box-shadow: 0 25px 60px rgba(0, 0, 0, 0.4);
@@ -642,7 +761,7 @@ body {
 .loginCardHeader h2 {
   font-size: 20px;
   font-weight: 900;
-  color: #fff;
+  color: var(--title-color);
   margin-top: 16px;
   margin-bottom: 6px;
 }
@@ -669,11 +788,11 @@ body {
 }
 
 .loginForm input {
-  background: rgba(0, 0, 0, 0.25);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: var(--modal-input-bg);
+  border: 1px solid var(--modal-input-border);
   border-radius: 12px;
   padding: 12px 16px;
-  color: #fff;
+  color: var(--title-color);
   font-size: 14px;
   outline: none;
   transition: all 0.2s;
@@ -725,7 +844,7 @@ body {
 
 .adminPageWrapper {
   min-height: 100vh;
-  background: #06090e;
+  background: var(--admin-bg);
   position: relative;
 }
 
@@ -773,7 +892,7 @@ body {
 .adminDashboardHead h1 {
   font-size: 28px;
   font-weight: 900;
-  color: #fff;
+  color: var(--title-color);
   margin-bottom: 6px;
 }
 
@@ -788,9 +907,9 @@ body {
 }
 
 .adminResetBtn {
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  color: #d1d5db;
+  background: var(--admin-reset-btn-bg);
+  border: 1px solid var(--admin-reset-btn-border);
+  color: var(--admin-reset-btn-text);
   box-shadow: none;
 }
 
@@ -811,6 +930,32 @@ body {
 
 .adminTableResponsive {
   overflow-x: auto;
+  overflow-y: auto;
+  max-height: 520px;
+}
+
+/* Custom Sleek Scrollbar for Admin Table card */
+.adminTableResponsive::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+.adminTableResponsive::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.1);
+  border-radius: 4px;
+}
+.adminTableResponsive::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: 4px;
+}
+.adminTableResponsive::-webkit-scrollbar-thumb:hover {
+  background: var(--pink);
+}
+
+:root[data-theme="light"] .adminTableResponsive::-webkit-scrollbar-thumb {
+  background: rgba(15, 23, 42, 0.15);
+}
+:root[data-theme="light"] .adminTableResponsive::-webkit-scrollbar-thumb:hover {
+  background: var(--pink);
 }
 
 .adminTable {
@@ -822,22 +967,22 @@ body {
 
 .adminTable th {
   position: sticky;
-  top: 68px;
+  top: 0;
   z-index: 10;
-  background: #0c121d; /* Solid dark background matching the card body */
+  background: var(--admin-th-bg); /* Solid background matching the theme */
   border-bottom: 1px solid var(--card-border);
   padding: 18px 24px;
   font-weight: 800;
-  color: #fff;
+  color: var(--title-color);
   text-transform: uppercase;
   font-size: 11px;
   letter-spacing: 0.5px;
 }
 
 .adminTable td {
-  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  border-bottom: 1px solid var(--admin-td-border);
   padding: 16px 24px;
-  color: #e5e7eb;
+  color: var(--admin-td-text);
 }
 
 .adminTable tr:last-child td {
@@ -979,7 +1124,7 @@ body {
 .adminModalCard {
   width: 100%;
   max-width: 580px;
-  background: #0f172a;
+  background: var(--modal-card-bg);
   border: 1px solid var(--card-border);
   border-radius: 20px;
   padding: 36px;
@@ -1031,11 +1176,11 @@ body {
 .adminModalForm input,
 .adminModalForm select,
 .adminModalForm textarea {
-  background: rgba(0, 0, 0, 0.25);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: var(--modal-input-bg);
+  border: 1px solid var(--modal-input-border);
   border-radius: 10px;
   padding: 10px 14px;
-  color: #fff;
+  color: var(--title-color);
   font-size: 13.5px;
   outline: none;
   transition: border-color 0.2s;
@@ -1092,3 +1237,136 @@ body {
   color: #4b5563;
   margin-top: auto;
 }
+
+/* ==========================================================================
+   RESPONSIVE DESIGN FOR LAYOUT & HEADER
+   ========================================================================== */
+
+@media (max-width: 992px) {
+  .headerNav {
+    gap: 16px;
+  }
+}
+
+@media (max-width: 768px) {
+  .headerMain {
+    flex-direction: column;
+    gap: 16px;
+    padding: 16px 20px;
+    text-align: center;
+  }
+  .headerNav {
+    gap: 14px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  .subInner {
+    flex-direction: column;
+    gap: 12px;
+    padding: 12px 20px;
+  }
+  .portalHero {
+    padding: 60px 0 30px;
+  }
+  .portalHero h1 {
+    font-size: 28px;
+  }
+  .portalHero p {
+    font-size: 14px;
+    padding: 0 16px;
+  }
+  .searchBarContainer {
+    padding: 0 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .headerNav {
+    display: none; /* Hide placeholder navigation links on small mobiles to save space */
+  }
+  .subRight {
+    width: 100%;
+    justify-content: space-between;
+  }
+  .portalHero h1 {
+    font-size: 24px;
+  }
+  .portalHero p {
+    font-size: 13.5px;
+  }
+}
+
+/* ==========================================================================
+   METRICS & WORK GRID LAYOUTS (HOMEPAGE WIDGETS)
+   ========================================================================== */
+
+.metrics {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+}
+
+.metric {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 16px;
+  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  backdrop-filter: blur(12px);
+}
+
+.metric b {
+  font-size: 20px;
+  display: block;
+  color: var(--title-color);
+}
+
+.metric small {
+  color: var(--text-muted);
+  font-size: 10.5px;
+  font-weight: bold;
+}
+
+.workGrid {
+  display: grid;
+  grid-template-columns: 1.2fr 0.8fr;
+  gap: 24px;
+}
+
+@media (max-width: 800px) {
+  .workGrid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+}
+
+/* ==========================================================================
+   ACADEMY CARD STYLING & GRADIENTS
+   ========================================================================== */
+
+.c1 { background: linear-gradient(145deg, #8b6cff, #6247df); }
+.c2 { background: linear-gradient(145deg, #55abff, #4776ed); }
+.c3 { background: linear-gradient(145deg, #ffad58, #ef773f); }
+.c4 { background: linear-gradient(145deg, #57d3a1, #27a87c); }
+.c5 { background: linear-gradient(145deg, #fa82af, #e84d89); }
+.c6 { background: linear-gradient(145deg, #4fd4dd, #28a6bc); }
+
+.courseCard:hover {
+  transform: translateY(-4px) !important;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.25) !important;
+  border-color: rgba(236, 28, 107, 0.4) !important;
+}
+
+.coursePlayBtn {
+  transition: transform 0.2s ease, background-color 0.2s ease, color 0.2s ease;
+}
+
+.courseCard:hover .coursePlayBtn {
+  transform: scale(1.1) rotate(5deg);
+  background-color: var(--pink) !important;
+  color: #fff !important;
+}
+
+

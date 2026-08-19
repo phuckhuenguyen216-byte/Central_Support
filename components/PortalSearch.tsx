@@ -79,10 +79,10 @@ export function PortalSearch({
           <div
             className="categoryTabHighlight"
             style={{
-              width: `${100 / categories.length}%`,
-              transform: `translateX(${
+              width: `calc((100% - 8px) / ${categories.length})`,
+              transform: `translateX(calc(${
                 categories.findIndex((c) => c.key === activeCategory) * 100
-              }%)`,
+              }%))`,
             }}
           />
         </div>

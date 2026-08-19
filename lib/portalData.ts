@@ -8,6 +8,7 @@ export interface PortalLink {
   purposeEn: string;
   icon: string;
   isLocked: boolean;
+  roles?: string[]; // Allowed roles (e.g., ["Sales", "Marketing", "Developer", "Leader / PM", "Nhân viên mới"])
 }
 
 export const portalLinks: PortalLink[] = [
@@ -209,4 +210,62 @@ export const portalLinks: PortalLink[] = [
     icon: "globe",
     isLocked: false
   }
+];
+
+export interface PortalTask {
+  id: number;
+  title: string;
+  deadline: string;
+  category: 'high' | 'due' | 'normal';
+  isDone: boolean;
+  role: string; // "Sales" | "Marketing" | "Developer" | "Leader / PM" | "Nhân viên mới" | "Tất cả"
+}
+
+export interface PortalAnnouncement {
+  id: number;
+  type: string; // "📣" | "🎉" | "📘" | "⚙"
+  title: string;
+  content: string;
+  time: string;
+  role: string;
+}
+
+export const portalTasks: PortalTask[] = [
+  { id: 1, title: "Gọi lại khách hàng CÔNG TY AN PHÚC", deadline: "CRM · Hạn 10:30", category: "high", isDone: false, role: "Sales" },
+  { id: 2, title: "Hoàn thành khóa Demo Markee App", deadline: "Học viện · Hạn 14:00", category: "due", isDone: false, role: "Sales" },
+  { id: 3, title: "Cập nhật pipeline tuần 33", deadline: "Markee CRM · Hạn 16:30", category: "normal", isDone: false, role: "Sales" },
+  { id: 4, title: "Thiết kế Banner chiến dịch mới", deadline: "Design kit · Hạn 17:00", category: "high", isDone: false, role: "Marketing" },
+  { id: 5, title: "Review Manday & Code Review", deadline: "GitLab · Hạn 15:30", category: "normal", isDone: false, role: "Developer" },
+  { id: 6, title: "Gửi báo cáo hiệu suất Leader", deadline: "KPI Center · Hạn 18:00", category: "high", isDone: false, role: "Leader / PM" },
+  { id: 7, title: "Kích hoạt tài khoản & Đọc quy chế công ty", deadline: "HRM · Đã hoàn thành", category: "normal", isDone: true, role: "Nhân viên mới" },
+  { id: 8, title: "Đăng ký vân tay & Chụp ảnh thẻ", deadline: "Văn phòng · Đã hoàn thành", category: "normal", isDone: true, role: "Nhân viên mới" }
+];
+
+export const portalAnnouncements: PortalAnnouncement[] = [
+  { id: 1, type: "📣", title: "Town Hall tháng 8", content: "Toàn công ty họp lúc 16:00 thứ Sáu tại phòng All Hands.", time: "2 giờ trước", role: "Tất cả" },
+  { id: 2, type: "🎉", title: "Chào mừng thành viên mới", content: "Chào mừng 4 thành viên mới gia nhập team Sales và DEV.", time: "Hôm qua", role: "Tất cả" },
+  { id: 3, type: "📘", title: "Cập nhật Sales Kit 2026", content: "Bổ sung bảng so sánh Markee App và đối thủ cạnh tranh.", time: "2 ngày trước", role: "Sales" },
+  { id: 4, type: "⚙", title: "Bảo trì Markee CRM", content: "Hệ thống bảo trì từ 22:00–23:00 ngày 14/08.", time: "3 ngày trước", role: "Sales" },
+  { id: 5, type: "📘", title: "Cập nhật Branding Guide", content: "Bộ logo và quy chuẩn thiết kế phiên bản 4.1.", time: "4 ngày trước", role: "Marketing" }
+];
+
+export interface PortalCourse {
+  id: number;
+  title: string;
+  titleEn: string;
+  description: string; // e.g. "Nhân sự mới · 6 bài · 45 phút"
+  descriptionEn: string;
+  color: 'c1' | 'c2' | 'c3' | 'c4' | 'c5' | 'c6';
+  progress: number;
+  url: string;
+  role: string;
+}
+
+export const portalCourses: PortalCourse[] = [
+  { id: 1, title: "Tổng quan hệ sinh thái POPTech", titleEn: "POPTech Ecosystem Overview", description: "Nhân sự mới · 6 bài · 45 phút", descriptionEn: "New Hire · 6 units · 45 mins", color: "c1", progress: 68, url: "https://youtube.com", role: "Nhân viên mới" },
+  { id: 2, title: "Demo sản phẩm cho khách hàng", titleEn: "Product Demo for Clients", description: "Sales · 5 bài · 38 phút", descriptionEn: "Sales · 5 units · 38 mins", color: "c2", progress: 35, url: "https://youtube.com", role: "Sales" },
+  { id: 3, title: "Từ Lead đến Chốt deal với CRM", titleEn: "Lead to Close with CRM", description: "Sales · 8 bài · 1 giờ 10 phút", descriptionEn: "Sales · 8 units · 1h 10m", color: "c5", progress: 20, url: "https://youtube.com", role: "Sales" },
+  { id: 4, title: "Bảo mật & quy trình nội bộ", titleEn: "Security & Internal Processes", description: "Bắt buộc · 4 bài · 25 phút", descriptionEn: "Required · 4 units · 25 mins", color: "c4", progress: 100, url: "https://youtube.com", role: "Tất cả" },
+  { id: 5, title: "POPTech Seeding thực chiến", titleEn: "POPTech Seeding Hands-on", description: "Sales & Marketing · 7 bài · 55 phút", descriptionEn: "Sales & Marketing · 7 units · 55 mins", color: "c3", progress: 0, url: "https://youtube.com", role: "Marketing" },
+  { id: 6, title: "Kỹ năng khai thác nhu cầu SME", titleEn: "SME Needs Discovery Skills", description: "Sales · 6 bài · 42 phút", descriptionEn: "Sales & 6 units · 42 mins", color: "c6", progress: 0, url: "https://youtube.com", role: "Sales" }
 ];
