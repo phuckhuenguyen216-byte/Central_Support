@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useLanguage } from "@/lib/LanguageContext";
 import { useTheme } from "@/lib/ThemeContext";
-import { portalLinks, PortalLink, PortalTask, PortalAnnouncement, portalTasks, portalAnnouncements, PortalCourse, portalCourses } from "@/lib/portalData";
+import { portalLinks, PortalLink, PortalCourse, portalCourses } from "@/lib/portalData";
 import { Logo } from "@/components/Logo";
 import { PortalCard } from "@/components/PortalCard";
 import { PortalSearch } from "@/components/PortalSearch";
@@ -13,15 +13,13 @@ export default function Home() {
   const { lang, setLang } = useLanguage();
   const { theme, toggleTheme } = useTheme();
   const [links, setLinks] = useState<PortalLink[]>([]);
-  const [tasks, setTasks] = useState<PortalTask[]>([]);
-  const [announcements, setAnnouncements] = useState<PortalAnnouncement[]>([]);
   const [courses, setCourses] = useState<PortalCourse[]>([]);
   
   const [searchQuery, setSearchQuery] = useState("");
   const [activeCategory, setActiveCategory] = useState("all");
   const [selectedRole, setSelectedRole] = useState<string>("Tất cả");
 
-  // Load links, tasks, announcements and courses from localStorage or import database on mount
+  // Load links and courses from localStorage or import database on mount
   useEffect(() => {
     // 1. Links
     const savedLinks = localStorage.getItem("sz_portal_links");
@@ -36,33 +34,7 @@ export default function Home() {
       localStorage.setItem("sz_portal_links", JSON.stringify(portalLinks));
     }
 
-    // 2. Tasks
-    const savedTasks = localStorage.getItem("sz_portal_tasks");
-    if (savedTasks) {
-      try {
-        setTasks(JSON.parse(savedTasks));
-      } catch (e) {
-        setTasks(portalTasks);
-      }
-    } else {
-      setTasks(portalTasks);
-      localStorage.setItem("sz_portal_tasks", JSON.stringify(portalTasks));
-    }
-
-    // 3. Announcements
-    const savedAnn = localStorage.getItem("sz_portal_announcements");
-    if (savedAnn) {
-      try {
-        setAnnouncements(JSON.parse(savedAnn));
-      } catch (e) {
-        setAnnouncements(portalAnnouncements);
-      }
-    } else {
-      setAnnouncements(portalAnnouncements);
-      localStorage.setItem("sz_portal_announcements", JSON.stringify(portalAnnouncements));
-    }
-
-    // 4. Courses
+    // 2. Courses
     const savedCourses = localStorage.getItem("sz_portal_courses");
     if (savedCourses) {
       try {
@@ -95,27 +67,10 @@ export default function Home() {
     return matchCategory && matchSearch && matchRole;
   });
 
-  // Filter tasks based on active role
-  const filteredTasks = tasks.filter((task) => 
-    selectedRole === "Tất cả" || task.role === "Tất cả" || task.role === selectedRole
-  );
-
-  // Filter announcements based on active role
-  const filteredAnnouncements = announcements.filter((ann) => 
-    selectedRole === "Tất cả" || ann.role === "Tất cả" || ann.role === selectedRole
-  );
-
   // Filter courses based on active role
   const filteredCourses = courses.filter((course) =>
     selectedRole === "Tất cả" || course.role === "Tất cả" || course.role === selectedRole
   );
-
-  // Toggle complete status of a task on click
-  const handleToggleTaskDone = (id: number) => {
-    const updated = tasks.map((t) => (t.id === id ? { ...t, isDone: !t.isDone } : t));
-    setTasks(updated);
-    localStorage.setItem("sz_portal_tasks", JSON.stringify(updated));
-  };
 
   return (
     <div className="portalPageWrapper">
@@ -290,21 +245,11 @@ export default function Home() {
           </div>
 
           <div className="metric" style={{ background: 'var(--card-bg)', border: '1px solid var(--card-border)', borderRadius: '16px', padding: '16px 20px', display: 'flex', alignItems: 'center', gap: '14px' }}>
-            <div className="metricIcon blue" style={{ width: '40px', height: '40px', borderRadius: '10px', display: 'grid', placeItems: 'center', fontSize: '18px', background: 'rgba(62, 128, 227, 0.1)', color: '#3e80e3' }}>▣</div>
+            <div className="metricIcon blue" style={{ width: '40px', height: '40px', borderRadius: '10px', display: 'grid', placeItems: 'center', fontSize: '18px', background: 'rgba(62, 128, 227, 0.1)', color: '#3e80e3' }}>🎓</div>
             <div>
-              <b style={{ fontSize: '20px', display: 'block', color: 'var(--title-color)' }}>{filteredTasks.filter(t => !t.isDone).length}</b>
+              <b style={{ fontSize: '20px', display: 'block', color: 'var(--title-color)' }}>{filteredCourses.length}</b>
               <small style={{ color: 'var(--text-muted)', fontSize: '10.5px', fontWeight: 'bold' }}>
-                {lang === "vi" ? "Công việc cần làm" : "Pending tasks"}
-              </small>
-            </div>
-          </div>
-
-          <div className="metric" style={{ background: 'var(--card-bg)', border: '1px solid var(--card-border)', borderRadius: '16px', padding: '16px 20px', display: 'flex', alignItems: 'center', gap: '14px' }}>
-            <div className="metricIcon amber" style={{ width: '40px', height: '40px', borderRadius: '10px', display: 'grid', placeItems: 'center', fontSize: '18px', background: 'rgba(239, 155, 45, 0.1)', color: '#ef9b2d' }}>🔔</div>
-            <div>
-              <b style={{ fontSize: '20px', display: 'block', color: 'var(--title-color)' }}>{filteredAnnouncements.length}</b>
-              <small style={{ color: 'var(--text-muted)', fontSize: '10.5px', fontWeight: 'bold' }}>
-                {lang === "vi" ? "Thông báo nội bộ" : "Announcements"}
+                {lang === "vi" ? "Khóa học có sẵn" : "Active courses"}
               </small>
             </div>
           </div>
@@ -431,7 +376,7 @@ export default function Home() {
       </section>
 
       {/* MAIN CARDS DIRECTORY */}
-      <section className="portalDirectorySection">
+      <section className="portalDirectorySection" style={{ marginBottom: '64px' }}>
         <div className="container">
           {filteredLinks.length > 0 ? (
             <div className="portalCardsGrid">
@@ -465,123 +410,6 @@ export default function Home() {
               )}
             </div>
           )}
-        </div>
-      </section>
-
-      {/* TASKS & ANNOUNCEMENTS SECTION */}
-      <section className="container" style={{ marginTop: '24px', marginBottom: '64px' }}>
-        <div className="workGrid" style={{ display: 'grid', gridTemplateColumns: '1.2fr 0.8fr', gap: '24px' }}>
-          
-          {/* TASK CHECKLIST PANEL */}
-          <div className="panel" style={{ background: 'var(--card-bg)', border: '1px solid var(--card-border)', borderRadius: '20px', padding: '24px', backdropFilter: 'blur(12px)' }}>
-            <div className="sectionHead" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-              <div>
-                <h2 style={{ fontSize: '18px', fontWeight: '850', color: 'var(--title-color)', margin: 0 }}>
-                  {lang === "vi" ? "Công việc của tôi" : "My Checklist"}
-                </h2>
-                <p style={{ fontSize: '12px', color: 'var(--text-muted)', margin: '4px 0 0' }}>
-                  {lang === "vi" ? "Theo dõi các công việc được gán theo vai trò" : "Track assigned tasks by active role"}
-                </p>
-              </div>
-              <span style={{ fontSize: '12px', fontWeight: 'bold', color: 'var(--pink)' }}>
-                {filteredTasks.filter(t => t.isDone).length}/{filteredTasks.length} {lang === "vi" ? "hoàn thành" : "done"}
-              </span>
-            </div>
-
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginTop: '16px' }}>
-              {filteredTasks.length === 0 ? (
-                <div style={{ padding: '20px', textAlign: 'center', color: 'var(--text-muted)', fontSize: '13px' }}>
-                  {lang === "vi" ? "Không có công việc nào được gán cho vai trò này." : "No tasks assigned to this role."}
-                </div>
-              ) : (
-                filteredTasks.map((task) => (
-                  <div key={task.id} style={{ display: 'flex', alignItems: 'flex-start', gap: '12px', borderTop: '1px solid var(--card-border)', paddingTop: '12px', opacity: task.isDone ? 0.6 : 1 }}>
-                    <button 
-                      type="button"
-                      onClick={() => handleToggleTaskDone(task.id)}
-                      style={{ 
-                        background: task.isDone ? 'var(--pink)' : 'transparent', 
-                        border: '1px solid var(--pink)', 
-                        borderRadius: '6px', 
-                        width: '20px', 
-                        height: '20px', 
-                        display: 'grid', 
-                        placeItems: 'center', 
-                        cursor: 'pointer', 
-                        color: '#fff', 
-                        fontSize: '11px',
-                        marginTop: '2px',
-                        flexShrink: 0
-                      }}
-                    >
-                      {task.isDone && "✓"}
-                    </button>
-                    <div style={{ flex: 1 }}>
-                      <h4 style={{ fontSize: '13.5px', margin: 0, textDecoration: task.isDone ? 'line-through' : 'none', color: 'var(--title-color)', fontWeight: 'bold' }}>
-                        {task.title}
-                      </h4>
-                      <p style={{ fontSize: '11px', color: 'var(--text-muted)', margin: '4px 0 0' }}>
-                        ⏱ {task.deadline}
-                      </p>
-                    </div>
-                    <span className={`adminCatBadge ${task.category === "high" ? "cat-ops" : task.category === "due" ? "cat-data" : "cat-social"}`} style={{ flexShrink: 0, fontSize: '8.5px', padding: '2px 6px' }}>
-                      {task.category === "high" ? (lang === "vi" ? "ƯU TIÊN" : "HIGH") : task.category === "due" ? (lang === "vi" ? "SẮP HẠN" : "DUE") : (lang === "vi" ? "THƯỜNG" : "NORMAL")}
-                    </span>
-                  </div>
-                ))
-              )}
-            </div>
-          </div>
-
-          {/* ANNOUNCEMENTS PANEL */}
-          <div className="panel" style={{ background: 'var(--card-bg)', border: '1px solid var(--card-border)', borderRadius: '20px', padding: '24px', backdropFilter: 'blur(12px)' }}>
-            <div className="sectionHead" style={{ marginBottom: '16px' }}>
-              <h2 style={{ fontSize: '18px', fontWeight: '850', color: 'var(--title-color)', margin: 0 }}>
-                {lang === "vi" ? "Thông báo nội bộ" : "Announcements"}
-              </h2>
-              <p style={{ fontSize: '12px', color: 'var(--text-muted)', margin: '4px 0 0' }}>
-                {lang === "vi" ? "Cập nhật mới nhất từ ban quản trị" : "Latest updates from POPTech board"}
-              </p>
-            </div>
-
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-              {filteredAnnouncements.length === 0 ? (
-                <div style={{ padding: '20px', textAlign: 'center', color: 'var(--text-muted)', fontSize: '13px' }}>
-                  {lang === "vi" ? "Không có thông báo nào cho vai trò này." : "No announcements for this role."}
-                </div>
-              ) : (
-                filteredAnnouncements.map((ann) => (
-                  <div key={ann.id} style={{ display: 'flex', gap: '12px', borderTop: '1px solid var(--card-border)', paddingTop: '12px' }}>
-                    <div style={{ 
-                      width: '36px', 
-                      height: '36px', 
-                      borderRadius: '10px', 
-                      background: 'rgba(236, 28, 107, 0.1)', 
-                      border: '1px solid rgba(236, 28, 107, 0.2)',
-                      display: 'grid', 
-                      placeItems: 'center', 
-                      fontSize: '18px',
-                      flexShrink: 0
-                    }}>
-                      {ann.type}
-                    </div>
-                    <div style={{ flex: 1 }}>
-                      <h4 style={{ fontSize: '13.5px', margin: 0, color: 'var(--title-color)', fontWeight: 'bold' }}>
-                        {ann.title}
-                      </h4>
-                      <p style={{ fontSize: '11.5px', color: 'var(--text-muted)', margin: '4px 0', lineHeight: 1.45 }}>
-                        {ann.content}
-                      </p>
-                      <time style={{ fontSize: '10px', color: 'var(--text-muted)' }}>
-                        🕒 {ann.time}
-                      </time>
-                    </div>
-                  </div>
-                ))
-              )}
-            </div>
-          </div>
-
         </div>
       </section>
 

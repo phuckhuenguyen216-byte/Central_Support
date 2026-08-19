@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useLanguage } from "@/lib/LanguageContext";
 import { useTheme } from "@/lib/ThemeContext";
 import { Logo } from "@/components/Logo";
-import { portalLinks, PortalLink, PortalTask, PortalAnnouncement, portalTasks, portalAnnouncements, PortalCourse, portalCourses } from "@/lib/portalData";
+import { portalLinks, PortalLink, PortalCourse, portalCourses } from "@/lib/portalData";
 
 const AVAILABLE_ROLES = ["all", "Sales", "Marketing", "Developer", "Leader / PM", "Nhân viên mới"];
 
@@ -14,19 +14,14 @@ export default function AdminPage() {
   const { theme, toggleTheme } = useTheme();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [links, setLinks] = useState<PortalLink[]>([]);
+  const [courses, setCourses] = useState<PortalCourse[]>([]);
+  
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingLink, setEditingLink] = useState<PortalLink | null>(null);
+  const [editingCourse, setEditingCourse] = useState<PortalCourse | null>(null);
 
   // Tab state
-  const [adminTab, setAdminTab] = useState<"links" | "tasks" | "announcements" | "courses">("links");
-
-  // Task, Announcement & Course states
-  const [tasks, setTasks] = useState<PortalTask[]>([]);
-  const [announcements, setAnnouncements] = useState<PortalAnnouncement[]>([]);
-  const [courses, setCourses] = useState<PortalCourse[]>([]);
-  const [editingTask, setEditingTask] = useState<PortalTask | null>(null);
-  const [editingAnn, setEditingAnn] = useState<PortalAnnouncement | null>(null);
-  const [editingCourse, setEditingCourse] = useState<PortalCourse | null>(null);
+  const [adminTab, setAdminTab] = useState<"links" | "courses">("links");
 
   // Login states
   const [username, setUsername] = useState("");
@@ -43,19 +38,6 @@ export default function AdminPage() {
   const [formIcon, setFormIcon] = useState("globe");
   const [iconSource, setIconSource] = useState<"preset" | "url" | "upload">("preset");
   const [formRoles, setFormRoles] = useState<string[]>(["all"]);
-
-  // Form states for Tasks
-  const [taskTitle, setTaskTitle] = useState("");
-  const [taskDeadline, setTaskDeadline] = useState("");
-  const [taskCategory, setTaskCategory] = useState<PortalTask["category"]>("normal");
-  const [taskRole, setTaskRole] = useState("Sales");
-
-  // Form states for Announcements
-  const [annType, setAnnType] = useState("📣");
-  const [annTitle, setAnnTitle] = useState("");
-  const [annContent, setAnnContent] = useState("");
-  const [annTime, setAnnTime] = useState("");
-  const [annRole, setAnnRole] = useState("Tất cả");
 
   // Form states for Courses
   const [courseTitle, setCourseTitle] = useState("");
@@ -96,7 +78,7 @@ export default function AdminPage() {
     }
   }, []);
 
-  // Load links, tasks, announcements and courses from localStorage on mount
+  // Load links and courses from localStorage on mount
   useEffect(() => {
     const savedLinks = localStorage.getItem("sz_portal_links");
     if (savedLinks) {
@@ -107,30 +89,6 @@ export default function AdminPage() {
       }
     } else {
       setLinks(portalLinks);
-    }
-
-    const savedTasks = localStorage.getItem("sz_portal_tasks");
-    if (savedTasks) {
-      try {
-        setTasks(JSON.parse(savedTasks));
-      } catch (e) {
-        setTasks(portalTasks);
-      }
-    } else {
-      setTasks(portalTasks);
-      localStorage.setItem("sz_portal_tasks", JSON.stringify(portalTasks));
-    }
-
-    const savedAnn = localStorage.getItem("sz_portal_announcements");
-    if (savedAnn) {
-      try {
-        setAnnouncements(JSON.parse(savedAnn));
-      } catch (e) {
-        setAnnouncements(portalAnnouncements);
-      }
-    } else {
-      setAnnouncements(portalAnnouncements);
-      localStorage.setItem("sz_portal_announcements", JSON.stringify(portalAnnouncements));
     }
 
     const savedCourses = localStorage.getItem("sz_portal_courses");
@@ -176,7 +134,13 @@ export default function AdminPage() {
     localStorage.setItem("sz_portal_links", JSON.stringify(updatedLinks));
   };
 
-  // Open modal for adding new link
+  // Save Courses database utility
+  const saveCourses = (updatedCourses: PortalCourse[]) => {
+    setCourses(updatedCourses);
+    localStorage.setItem("sz_portal_courses", JSON.stringify(updatedCourses));
+  };
+
+  // Open modal for adding new link or course
   const handleAddClick = () => {
     if (adminTab === "links") {
       setEditingLink(null);
@@ -189,19 +153,6 @@ export default function AdminPage() {
       setFormIcon("globe");
       setIconSource("preset");
       setFormRoles(["all"]);
-    } else if (adminTab === "tasks") {
-      setEditingTask(null);
-      setTaskTitle("");
-      setTaskDeadline("");
-      setTaskCategory("normal");
-      setTaskRole("Sales");
-    } else if (adminTab === "announcements") {
-      setEditingAnn(null);
-      setAnnType("📣");
-      setAnnTitle("");
-      setAnnContent("");
-      setAnnTime(lang === "vi" ? "Mới đây" : "Just now");
-      setAnnRole("Tất cả");
     } else if (adminTab === "courses") {
       setEditingCourse(null);
       setCourseTitle("");
@@ -228,7 +179,6 @@ export default function AdminPage() {
     setFormIcon(link.icon);
     setFormRoles(link.roles || ["all"]);
     
-    // Determine icon source based on format
     if (link.icon && link.icon.startsWith("data:")) {
       setIconSource("upload");
     } else if (link.icon && (link.icon.startsWith("http://") || link.icon.startsWith("https://"))) {
@@ -237,45 +187,6 @@ export default function AdminPage() {
       setIconSource("preset");
     }
     
-    setIsModalOpen(true);
-  };
-
-  // Save Tasks database utility
-  const saveTasks = (updatedTasks: PortalTask[]) => {
-    setTasks(updatedTasks);
-    localStorage.setItem("sz_portal_tasks", JSON.stringify(updatedTasks));
-  };
-
-  // Save Announcements database utility
-  const saveAnnouncements = (updatedAnn: PortalAnnouncement[]) => {
-    setAnnouncements(updatedAnn);
-    localStorage.setItem("sz_portal_announcements", JSON.stringify(updatedAnn));
-  };
-
-  // Save Courses database utility
-  const saveCourses = (updatedCourses: PortalCourse[]) => {
-    setCourses(updatedCourses);
-    localStorage.setItem("sz_portal_courses", JSON.stringify(updatedCourses));
-  };
-
-  // Open modal for editing task
-  const handleEditTaskClick = (task: PortalTask) => {
-    setEditingTask(task);
-    setTaskTitle(task.title);
-    setTaskDeadline(task.deadline);
-    setTaskCategory(task.category);
-    setTaskRole(task.role);
-    setIsModalOpen(true);
-  };
-
-  // Open modal for editing announcement
-  const handleEditAnnClick = (ann: PortalAnnouncement) => {
-    setEditingAnn(ann);
-    setAnnType(ann.type);
-    setAnnTitle(ann.title);
-    setAnnContent(ann.content);
-    setAnnTime(ann.time);
-    setAnnRole(ann.role);
     setIsModalOpen(true);
   };
 
@@ -334,65 +245,6 @@ export default function AdminPage() {
         };
         saveLinks([...links, newLink]);
       }
-    } else if (adminTab === "tasks") {
-      if (editingTask) {
-        // Edit Mode
-        const updated = tasks.map((t) => {
-          if (t.id === editingTask.id) {
-            return {
-              ...t,
-              title: taskTitle,
-              deadline: taskDeadline,
-              category: taskCategory,
-              role: taskRole,
-            };
-          }
-          return t;
-        });
-        saveTasks(updated);
-      } else {
-        // Add Mode
-        const newId = tasks.length > 0 ? Math.max(...tasks.map((t) => t.id)) + 1 : 1;
-        const newTask: PortalTask = {
-          id: newId,
-          title: taskTitle,
-          deadline: taskDeadline,
-          category: taskCategory,
-          isDone: false,
-          role: taskRole,
-        };
-        saveTasks([...tasks, newTask]);
-      }
-    } else if (adminTab === "announcements") {
-      if (editingAnn) {
-        // Edit Mode
-        const updated = announcements.map((a) => {
-          if (a.id === editingAnn.id) {
-            return {
-              ...a,
-              type: annType,
-              title: annTitle,
-              content: annContent,
-              time: annTime,
-              role: annRole,
-            };
-          }
-          return a;
-        });
-        saveAnnouncements(updated);
-      } else {
-        // Add Mode
-        const newId = announcements.length > 0 ? Math.max(...announcements.map((a) => a.id)) + 1 : 1;
-        const newAnn: PortalAnnouncement = {
-          id: newId,
-          type: annType,
-          title: annTitle,
-          content: annContent,
-          time: annTime,
-          role: annRole,
-        };
-        saveAnnouncements([...announcements, newAnn]);
-      }
     } else if (adminTab === "courses") {
       if (editingCourse) {
         // Edit Mode
@@ -445,12 +297,6 @@ export default function AdminPage() {
     saveLinks(updated);
   };
 
-  // Toggle complete status of a task
-  const handleToggleTaskDone = (id: number) => {
-    const updated = tasks.map((t) => (t.id === id ? { ...t, isDone: !t.isDone } : t));
-    saveTasks(updated);
-  };
-
   // Delete a link
   const handleDeleteLink = (id: number) => {
     const confirmMsg =
@@ -460,30 +306,6 @@ export default function AdminPage() {
     if (confirm(confirmMsg)) {
       const updated = links.filter((link) => link.id !== id);
       saveLinks(updated);
-    }
-  };
-
-  // Delete a task
-  const handleDeleteTask = (id: number) => {
-    const confirmMsg =
-      lang === "vi"
-        ? "Bạn có chắc chắn muốn xóa công việc này?"
-        : "Are you sure you want to delete this task?";
-    if (confirm(confirmMsg)) {
-      const updated = tasks.filter((t) => t.id !== id);
-      saveTasks(updated);
-    }
-  };
-
-  // Delete an announcement
-  const handleDeleteAnn = (id: number) => {
-    const confirmMsg =
-      lang === "vi"
-        ? "Bạn có chắc chắn muốn xóa thông báo này?"
-        : "Are you sure you want to delete this announcement?";
-    if (confirm(confirmMsg)) {
-      const updated = announcements.filter((a) => a.id !== id);
-      saveAnnouncements(updated);
     }
   };
 
@@ -499,16 +321,14 @@ export default function AdminPage() {
     }
   };
 
-  // Reset to default spreadsheet database
+  // Reset to default database configurations
   const handleResetData = () => {
     const confirmMsg =
       lang === "vi"
-        ? "Khôi phục lại toàn bộ dữ liệu gốc ban đầu cho liên kết, công việc, thông báo và khóa học?"
-        : "Reset all links, tasks, announcements and courses to default?";
+        ? "Khôi phục lại toàn bộ dữ liệu gốc ban đầu cho liên kết và khóa học?"
+        : "Reset all links and courses to default?";
     if (confirm(confirmMsg)) {
       saveLinks(portalLinks);
-      saveTasks(portalTasks);
-      saveAnnouncements(portalAnnouncements);
       saveCourses(portalCourses);
     }
   };
@@ -516,44 +336,39 @@ export default function AdminPage() {
   // 1. RENDER ADMIN LOGIN PAGE (If not authenticated)
   if (!isLoggedIn) {
     return (
-      <div className="adminPageWrapper loginScreen">
+      <div className="portalPageWrapper adminLoginPage">
         <div className="portalBgGrid" />
         <div className="portalBgGlow pg1" />
-        <div className="portalBgGlow pg2" />
 
-        <div className="loginCardContainer">
+        <div className="loginContainer">
           <div className="loginCard">
             <div className="loginCardHeader">
               <Logo />
-              <h2>{lang === "vi" ? "Đăng nhập Quản trị" : "Admin Authentication"}</h2>
-              <p>
-                {lang === "vi"
-                  ? "Nhập tài khoản để truy cập chức năng điều khiển liên kết."
-                  : "Please input credentials to manage Central Portal database."}
-              </p>
+              <h2>{lang === "vi" ? "Trang quản trị hệ thống" : "Admin Console"}</h2>
+              <p>{lang === "vi" ? "Đăng nhập bằng tài khoản quản trị POPTech" : "Access the centralized system manager"}</p>
             </div>
 
+            {loginError && <div className="loginErrorMessage">{loginError}</div>}
+
             <form onSubmit={handleLoginSubmit} className="loginForm">
-              {loginError && <div className="loginErrorMessage">⚠️ {loginError}</div>}
-              
               <label>
-                {lang === "vi" ? "Tên tài khoản (Username)" : "Username"}
+                {lang === "vi" ? "Tên tài khoản" : "Username"}
                 <input
                   type="text"
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
-                  placeholder="E.g., poptech_admin"
+                  placeholder="E.g., admin_poptech"
                   required
                 />
               </label>
 
               <label>
-                {lang === "vi" ? "Mật khẩu (Password)" : "Password"}
+                {lang === "vi" ? "Mật khẩu" : "Password"}
                 <input
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  placeholder="••••••••••••"
+                  placeholder="••••••••"
                   required
                 />
               </label>
@@ -653,14 +468,6 @@ export default function AdminPage() {
                 lang === "vi"
                   ? "Thêm, chỉnh sửa, xóa và khóa trạng thái liên kết hiển thị trên trang chủ."
                   : "Add, edit, remove or toggle display lock for portal shortcuts in real-time."
-              ) : adminTab === "tasks" ? (
-                lang === "vi"
-                  ? "Quản lý danh sách checklist công việc cá nhân của nhân sự trong công ty."
-                  : "Manage the list of task checklists for company employees."
-              ) : adminTab === "announcements" ? (
-                lang === "vi"
-                  ? "Quản lý các bản tin và thông báo nội bộ hiển thị trên bảng tin trang chủ."
-                  : "Manage announcements and internal newsletters broadcasted on the home board."
               ) : (
                 lang === "vi"
                   ? "Quản lý các khóa học học tập nội bộ POPTech Academy cho nhân sự."
@@ -683,10 +490,6 @@ export default function AdminPage() {
             >
               ＋ {adminTab === "links" 
                     ? (lang === "vi" ? "Thêm liên kết mới" : "Add New Link") 
-                    : adminTab === "tasks" 
-                    ? (lang === "vi" ? "Thêm công việc mới" : "Add New Task") 
-                    : adminTab === "announcements"
-                    ? (lang === "vi" ? "Thêm thông báo mới" : "Add Announcement")
                     : (lang === "vi" ? "Thêm khóa học mới" : "Add New Course")}
             </button>
           </div>
@@ -701,22 +504,6 @@ export default function AdminPage() {
             style={{ padding: '8px 16px', borderRadius: '8px', fontSize: '13px', display: 'inline-flex', alignItems: 'center', gap: '6px' }}
           >
             🔗 {lang === "vi" ? "Liên kết trang web" : "Web Links"} ({links.length})
-          </button>
-          <button
-            type="button"
-            className={`primaryBtn ${adminTab === "tasks" ? "" : "adminResetBtn"}`}
-            onClick={() => setAdminTab("tasks")}
-            style={{ padding: '8px 16px', borderRadius: '8px', fontSize: '13px', display: 'inline-flex', alignItems: 'center', gap: '6px' }}
-          >
-            ✓ {lang === "vi" ? "Checklist công việc" : "Task Checklist"} ({tasks.length})
-          </button>
-          <button
-            type="button"
-            className={`primaryBtn ${adminTab === "announcements" ? "" : "adminResetBtn"}`}
-            onClick={() => setAdminTab("announcements")}
-            style={{ padding: '8px 16px', borderRadius: '8px', fontSize: '13px', display: 'inline-flex', alignItems: 'center', gap: '6px' }}
-          >
-            📣 {lang === "vi" ? "Thông báo nội bộ" : "Internal Announcements"} ({announcements.length})
           </button>
           <button
             type="button"
@@ -746,27 +533,32 @@ export default function AdminPage() {
                 </thead>
                 <tbody>
                   {links.map((link) => (
-                    <tr key={link.id} className={link.isLocked ? "rowLocked" : ""}>
+                    <tr key={link.id}>
                       <td><b>{link.id}</b></td>
                       <td>
-                        <div className="adminTableNameCell">
-                          <span className="adminTableIcon">
-                            {link.icon && (link.icon.startsWith("http://") || link.icon.startsWith("https://") || link.icon.startsWith("data:")) ? (
-                              <img src={link.icon} alt="" style={{ width: "16px", height: "16px", objectFit: "contain", borderRadius: "2px" }} />
-                            ) : (
-                              link.icon === "check" ? "✓" : link.icon === "cpu" ? "⚙" : "🌐"
-                            )}
-                          </span>
+                        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                          {link.icon && (link.icon.startsWith("data:") || link.icon.startsWith("http://") || link.icon.startsWith("https://")) ? (
+                            <img 
+                              src={link.icon} 
+                              alt={link.name} 
+                              style={{ width: "16px", height: "16px", objectFit: "contain", borderRadius: "3px" }} 
+                            />
+                          ) : (
+                            <span style={{ fontSize: "14px" }}>🌐</span>
+                          )}
                           <div>
-                            <strong>{lang === "vi" ? link.name : link.nameEn}</strong>
-                            <small>{lang === "vi" ? link.nameEn : link.name}</small>
-                            <div style={{ display: 'flex', gap: '4px', marginTop: '4px', flexWrap: 'wrap' }}>
-                              {(link.roles || ["all"]).map(r => (
-                                <span key={r} style={{ fontSize: '9px', padding: '2px 5px', background: 'rgba(255,255,255,0.06)', borderRadius: '4px', color: 'var(--text-muted)', fontWeight: 'bold' }}>
-                                  {r === "all" ? (lang === "vi" ? "Tất cả" : "All") : r}
-                                </span>
-                              ))}
-                            </div>
+                            <strong style={{ color: "var(--foreground)" }}>
+                              {lang === "vi" ? link.name : link.nameEn}
+                            </strong>
+                            {link.roles && link.roles.length > 0 && (
+                              <div style={{ display: "flex", gap: "4px", marginTop: "3px", flexWrap: "wrap" }}>
+                                {link.roles.map(role => (
+                                  <span key={role} style={{ fontSize: "8px", background: "rgba(255,255,255,0.06)", padding: "1px 4px", borderRadius: "3px", color: "var(--text-muted)", fontWeight: "bold" }}>
+                                    {role === "all" ? "ALL" : role.toUpperCase()}
+                                  </span>
+                                ))}
+                              </div>
+                            )}
                           </div>
                         </div>
                       </td>
@@ -776,13 +568,13 @@ export default function AdminPage() {
                         </a>
                       </td>
                       <td>
-                        <span className={`adminCatBadge cat-${link.category}`}>
-                          {link.category.toUpperCase()}
+                        <span className={`adminCatBadge ${link.category === "ops" ? "cat-ops" : link.category === "data" ? "cat-data" : link.category === "social" ? "cat-social" : "cat-public"}`}>
+                          {link.category === "ops" ? (lang === "vi" ? "VẬN HÀNH" : "OPERATIONS") : link.category === "data" ? (lang === "vi" ? "DỮ LIỆU" : "DATA & REPORT") : link.category === "social" ? (lang === "vi" ? "TRUYỀN THÔNG" : "COMMUNICATION") : (lang === "vi" ? "CÔNG CỘNG" : "PUBLIC SITE")}
                         </span>
                       </td>
                       <td>
-                        <div className="adminTablePurposeCell">
-                          <span>{lang === "vi" ? link.purpose : link.purposeEn}</span>
+                        <div className="adminTablePurpose">
+                          {lang === "vi" ? link.purpose : link.purposeEn}
                         </div>
                       </td>
                       <td>
@@ -791,11 +583,7 @@ export default function AdminPage() {
                           onClick={() => handleToggleLock(link.id)}
                           className={`adminStatusToggleBtn ${link.isLocked ? "isLocked" : "isActive"}`}
                         >
-                          {link.isLocked ? (
-                            <>🔒 {lang === "vi" ? "Đã Khóa" : "Locked"}</>
-                          ) : (
-                            <>🔓 {lang === "vi" ? "Hoạt động" : "Active"}</>
-                          )}
+                          {link.isLocked ? (lang === "vi" ? "Đã Khóa" : "Locked") : (lang === "vi" ? "Hoạt động" : "Active")}
                         </button>
                       </td>
                       <td>
@@ -811,135 +599,6 @@ export default function AdminPage() {
                             type="button"
                             className="adminActionBtn deleteBtn"
                             onClick={() => handleDeleteLink(link.id)}
-                          >
-                            {lang === "vi" ? "Xóa" : "Delete"}
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            )}
-
-            {adminTab === "tasks" && (
-              <table className="adminTable">
-                <thead>
-                  <tr>
-                    <th>ID</th>
-                    <th>{lang === "vi" ? "Tiêu đề công việc" : "Task Title"}</th>
-                    <th>{lang === "vi" ? "Hạn chót" : "Deadline"}</th>
-                    <th>{lang === "vi" ? "Mức ưu tiên" : "Priority"}</th>
-                    <th>{lang === "vi" ? "Vai trò" : "Role"}</th>
-                    <th>{lang === "vi" ? "Trạng thái" : "Status"}</th>
-                    <th style={{ textAlign: "center" }}>{lang === "vi" ? "Hành động" : "Actions"}</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {tasks.map((task) => (
-                    <tr key={task.id} className={task.isDone ? "rowLocked" : ""}>
-                      <td><b>{task.id}</b></td>
-                      <td>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                          <button 
-                            type="button"
-                            onClick={() => handleToggleTaskDone(task.id)}
-                            style={{ background: task.isDone ? '#6d4df5' : 'transparent', border: '1px solid #6d4df5', borderRadius: '4px', width: '18px', height: '18px', display: 'grid', placeItems: 'center', cursor: 'pointer', color: '#fff', fontSize: '10px' }}
-                          >
-                            {task.isDone && "✓"}
-                          </button>
-                          <span style={{ textDecoration: task.isDone ? 'line-through' : 'none', color: task.isDone ? 'var(--text-muted)' : 'var(--foreground)', fontWeight: 'bold' }}>
-                            {task.title}
-                          </span>
-                        </div>
-                      </td>
-                      <td>{task.deadline}</td>
-                      <td>
-                        <span className={`adminCatBadge ${task.category === "high" ? "cat-ops" : task.category === "due" ? "cat-data" : "cat-social"}`}>
-                          {task.category === "high" ? (lang === "vi" ? "ƯU TIÊN CAO" : "HIGH") : task.category === "due" ? (lang === "vi" ? "SẮP HẠN" : "DUE") : (lang === "vi" ? "BÌNH THƯỜNG" : "NORMAL")}
-                        </span>
-                      </td>
-                      <td>
-                        <span style={{ fontSize: '11px', padding: '3px 6px', background: 'rgba(255,255,255,0.06)', borderRadius: '4px', fontWeight: 'bold' }}>
-                          {task.role}
-                        </span>
-                      </td>
-                      <td>
-                        <button
-                          type="button"
-                          onClick={() => handleToggleTaskDone(task.id)}
-                          className={`adminStatusToggleBtn ${task.isDone ? "isLocked" : "isActive"}`}
-                        >
-                          {task.isDone ? (lang === "vi" ? "Xong" : "Done") : (lang === "vi" ? "Chưa xong" : "Pending")}
-                        </button>
-                      </td>
-                      <td>
-                        <div className="adminTableActionsCell">
-                          <button
-                            type="button"
-                            className="adminActionBtn editBtn"
-                            onClick={() => handleEditTaskClick(task)}
-                          >
-                            {lang === "vi" ? "Sửa" : "Edit"}
-                          </button>
-                          <button
-                            type="button"
-                            className="adminActionBtn deleteBtn"
-                            onClick={() => handleDeleteTask(task.id)}
-                          >
-                            {lang === "vi" ? "Xóa" : "Delete"}
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            )}
-
-            {adminTab === "announcements" && (
-              <table className="adminTable">
-                <thead>
-                  <tr>
-                    <th>ID</th>
-                    <th>{lang === "vi" ? "Biểu tượng" : "Type"}</th>
-                    <th>{lang === "vi" ? "Tiêu đề" : "Title"}</th>
-                    <th>{lang === "vi" ? "Nội dung thông báo" : "Announcement Content"}</th>
-                    <th>{lang === "vi" ? "Thời gian" : "Time"}</th>
-                    <th>{lang === "vi" ? "Vai trò" : "Role"}</th>
-                    <th style={{ textAlign: "center" }}>{lang === "vi" ? "Hành động" : "Actions"}</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {announcements.map((ann) => (
-                    <tr key={ann.id}>
-                      <td><b>{ann.id}</b></td>
-                      <td style={{ fontSize: '18px', textAlign: 'center' }}>{ann.type}</td>
-                      <td><strong style={{ color: 'var(--foreground)' }}>{ann.title}</strong></td>
-                      <td>
-                        <div style={{ maxWidth: '300px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', color: 'var(--text-muted)' }}>
-                          {ann.content}
-                        </div>
-                      </td>
-                      <td>{ann.time}</td>
-                      <td>
-                        <span style={{ fontSize: '11px', padding: '3px 6px', background: 'rgba(255,255,255,0.06)', borderRadius: '4px', fontWeight: 'bold' }}>
-                          {ann.role}
-                        </span>
-                      </td>
-                      <td>
-                        <div className="adminTableActionsCell">
-                          <button
-                            type="button"
-                            className="adminActionBtn editBtn"
-                            onClick={() => handleEditAnnClick(ann)}
-                          >
-                            {lang === "vi" ? "Sửa" : "Edit"}
-                          </button>
-                          <button
-                            type="button"
-                            className="adminActionBtn deleteBtn"
-                            onClick={() => handleDeleteAnn(ann.id)}
                           >
                             {lang === "vi" ? "Xóa" : "Delete"}
                           </button>
@@ -1036,14 +695,6 @@ export default function AdminPage() {
                   editingLink
                     ? (lang === "vi" ? "Chỉnh sửa liên kết" : "Edit Link Details")
                     : (lang === "vi" ? "Thêm liên kết mới" : "Add New Link")
-                ) : adminTab === "tasks" ? (
-                  editingTask
-                    ? (lang === "vi" ? "Chỉnh sửa công việc" : "Edit Task Details")
-                    : (lang === "vi" ? "Thêm công việc mới" : "Add New Task")
-                ) : adminTab === "announcements" ? (
-                  editingAnn
-                    ? (lang === "vi" ? "Chỉnh sửa thông báo" : "Edit Announcement Details")
-                    : (lang === "vi" ? "Thêm thông báo mới" : "Add Announcement")
                 ) : (
                   editingCourse
                     ? (lang === "vi" ? "Chỉnh sửa khóa học" : "Edit Course Details")
@@ -1103,60 +754,39 @@ export default function AdminPage() {
                         value={formCategory}
                         onChange={(e) => setFormCategory(e.target.value as PortalLink["category"])}
                       >
-                        <option value="ops">Hệ thống & KPI (OPS)</option>
-                        <option value="data">Đấu thầu & Dữ liệu (DATA)</option>
-                        <option value="social">Mạng xã hội & Cộng đồng (SOCIAL)</option>
-                        <option value="storage">Lưu trữ đám mây (STORAGE)</option>
-                        <option value="public">Trang thông tin doanh nghiệp (PUBLIC)</option>
+                        <option value="ops">{lang === "vi" ? "Vận hành nội bộ (Operations)" : "Operations (Internal)"}</option>
+                        <option value="data">{lang === "vi" ? "Dữ liệu & Báo cáo (Data & Report)" : "Data & Reports"}</option>
+                        <option value="social">{lang === "vi" ? "Truyền thông & Forum (Communication)" : "Communication & Forums"}</option>
+                        <option value="public">{lang === "vi" ? "Website Công cộng (Public Sites)" : "Public Websites"}</option>
                       </select>
                     </label>
 
-                    <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
-                      <span style={{ fontSize: "12px", fontWeight: "800", color: "var(--text-muted)" }}>
-                        {lang === "vi" ? "Nguồn biểu tượng (Icon)" : "Icon Source"}
-                      </span>
-                      <div style={{ display: "flex", gap: "6px" }}>
-                        <button
-                          type="button"
-                          className={`primaryBtn ${iconSource === "preset" ? "" : "adminResetBtn"}`}
-                          onClick={() => { setIconSource("preset"); setFormIcon("globe"); }}
-                          style={{ padding: "8px 10px", fontSize: "11px", borderRadius: "8px", boxShadow: "none", flex: 1, justifyContent: "center" }}
-                        >
-                          {lang === "vi" ? "Mẫu" : "Preset"}
-                        </button>
-                        <button
-                          type="button"
-                          className={`primaryBtn ${iconSource === "url" ? "" : "adminResetBtn"}`}
-                          onClick={() => { setIconSource("url"); setFormIcon("https://"); }}
-                          style={{ padding: "8px 10px", fontSize: "11px", borderRadius: "8px", boxShadow: "none", flex: 1, justifyContent: "center" }}
-                        >
-                          URL
-                        </button>
-                        <button
-                          type="button"
-                          className={`primaryBtn ${iconSource === "upload" ? "" : "adminResetBtn"}`}
-                          onClick={() => { setIconSource("upload"); setFormIcon(""); }}
-                          style={{ padding: "8px 10px", fontSize: "11px", borderRadius: "8px", boxShadow: "none", flex: 1, justifyContent: "center" }}
-                        >
-                          {lang === "vi" ? "Tải lên" : "Upload"}
-                        </button>
-                      </div>
-                    </div>
+                    <label>
+                      Nguồn biểu tượng (Icon Source)
+                      <select
+                        value={iconSource}
+                        onChange={(e) => setIconSource(e.target.value as any)}
+                      >
+                        <option value="preset">{lang === "vi" ? "Chọn từ Icon có sẵn" : "Choose Preset Icon"}</option>
+                        <option value="url">{lang === "vi" ? "Đường dẫn liên kết ảnh" : "Image Link URL"}</option>
+                        <option value="upload">{lang === "vi" ? "Tải lên từ máy" : "Upload File"}</option>
+                      </select>
+                    </label>
                   </div>
 
-                  <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+                  <div className="formRowGrid">
                     {iconSource === "preset" && (
                       <label>
-                        {lang === "vi" ? "Chọn biểu tượng mẫu" : "Select Preset Icon"}
-                        <select value={formIcon} onChange={(e) => setFormIcon(e.target.value)}>
-                          <option value="globe">Globe (Mặc định)</option>
-                          <option value="check">Checkmark (Kiểm tra task)</option>
-                          <option value="user">User (Tài khoản/Tư vấn)</option>
-                          <option value="message">Message (Diễn đàn/Chat)</option>
-                          <option value="cpu">CPU (Trí tuệ nhân tạo AI)</option>
-                          <option value="search">Search (Đấu thầu/Tìm thầu)</option>
-                          <option value="shield">Shield (Bảo mật/Xác minh)</option>
-                          <option value="chart">Chart (Thống kê/Báo cáo)</option>
+                        Chọn Biểu tượng (Preset Icon)
+                        <select
+                          value={formIcon.startsWith("data:") || formIcon.startsWith("http") ? "globe" : formIcon}
+                          onChange={(e) => setFormIcon(e.target.value)}
+                        >
+                          <option value="globe">Globe (Mạng lưới/Trang chủ)</option>
+                          <option value="lock">Lock (Bảo mật/Hệ thống)</option>
+                          <option value="chart">Chart (Báo cáo/Doanh số)</option>
+                          <option value="people">People (Cộng đồng/HR)</option>
+                          <option value="message">Message (Chat/Truyền thông)</option>
                           <option value="folder">Folder (Kế hoạch/PM)</option>
                           <option value="play">Play (Video/Youtube)</option>
                           <option value="facebook">Facebook (Mạng xã hội)</option>
@@ -1263,130 +893,6 @@ export default function AdminPage() {
                 </>
               )}
 
-              {adminTab === "tasks" && (
-                <>
-                  <label>
-                    {lang === "vi" ? "Tiêu đề công việc" : "Task Title"}
-                    <input
-                      type="text"
-                      value={taskTitle}
-                      onChange={(e) => setTaskTitle(e.target.value)}
-                      placeholder="Ví dụ: Gọi lại cho khách hàng..."
-                      required
-                    />
-                  </label>
-
-                  <div className="formRowGrid">
-                    <label>
-                      {lang === "vi" ? "Hạn chót" : "Deadline"}
-                      <input
-                        type="text"
-                        value={taskDeadline}
-                        onChange={(e) => setTaskDeadline(e.target.value)}
-                        placeholder="Ví dụ: CRM · Hạn 16:30"
-                        required
-                      />
-                    </label>
-
-                    <label>
-                      {lang === "vi" ? "Mức ưu tiên" : "Priority"}
-                      <select
-                        value={taskCategory}
-                        onChange={(e) => setTaskCategory(e.target.value as any)}
-                      >
-                        <option value="high">{lang === "vi" ? "Ưu tiên cao" : "High"}</option>
-                        <option value="due">{lang === "vi" ? "Sắp đến hạn" : "Due"}</option>
-                        <option value="normal">{lang === "vi" ? "Bình thường" : "Normal"}</option>
-                      </select>
-                    </label>
-                  </div>
-
-                  <label>
-                    {lang === "vi" ? "Vai trò được gán" : "Assigned Role"}
-                    <select
-                      value={taskRole}
-                      onChange={(e) => setTaskRole(e.target.value)}
-                    >
-                      <option value="Tất cả">{lang === "vi" ? "Tất cả" : "All"}</option>
-                      <option value="Sales">Sales</option>
-                      <option value="Marketing">Marketing</option>
-                      <option value="Developer">Developer</option>
-                      <option value="Leader / PM">Leader / PM</option>
-                      <option value="Nhân viên mới">{lang === "vi" ? "Nhân viên mới" : "New Hire"}</option>
-                    </select>
-                  </label>
-                </>
-              )}
-
-              {adminTab === "announcements" && (
-                <>
-                  <div className="formRowGrid">
-                    <label>
-                      {lang === "vi" ? "Biểu tượng cảm xúc (Emoji)" : "Emoji Icon"}
-                      <select
-                        value={annType}
-                        onChange={(e) => setAnnType(e.target.value)}
-                      >
-                        <option value="📣">📣 Loa (Thông báo chung)</option>
-                        <option value="🎉">🎉 Pháo hoa (Chào mừng)</option>
-                        <option value="📘">📘 Sách (Tài liệu/Sales Kit)</option>
-                        <option value="⚙">⚙ Bánh răng (Bảo trì/Cài đặt)</option>
-                        <option value="💡">💡 Bóng đèn (Mẹo/Ý tưởng)</option>
-                      </select>
-                    </label>
-
-                    <label>
-                      {lang === "vi" ? "Tiêu đề thông báo" : "Announcement Title"}
-                      <input
-                        type="text"
-                        value={annTitle}
-                        onChange={(e) => setAnnTitle(e.target.value)}
-                        placeholder="Ví dụ: Town Hall tháng 8"
-                        required
-                      />
-                    </label>
-                  </div>
-
-                  <label>
-                    {lang === "vi" ? "Nội dung chi tiết" : "Detailed Content"}
-                    <textarea
-                      value={annContent}
-                      onChange={(e) => setAnnContent(e.target.value)}
-                      placeholder="Nhập nội dung thông báo ngắn gọn..."
-                      rows={3}
-                      required
-                    />
-                  </label>
-
-                  <div className="formRowGrid">
-                    <label>
-                      {lang === "vi" ? "Thời gian đăng" : "Publish Time"}
-                      <input
-                        type="text"
-                        value={annTime}
-                        onChange={(e) => setAnnTime(e.target.value)}
-                        placeholder="Ví dụ: 2 giờ trước, Hôm qua..."
-                        required
-                      />
-                    </label>
-
-                    <label>
-                      {lang === "vi" ? "Vai trò nhìn thấy" : "Visible to Role"}
-                      <select
-                        value={annRole}
-                        onChange={(e) => setAnnRole(e.target.value)}
-                      >
-                        <option value="Tất cả">{lang === "vi" ? "Tất cả" : "All"}</option>
-                        <option value="Sales">Sales</option>
-                        <option value="Marketing">Marketing</option>
-                        <option value="Developer">Developer</option>
-                        <option value="Leader / PM">Leader / PM</option>
-                        <option value="Nhân viên mới">{lang === "vi" ? "Nhân viên mới" : "New Hire"}</option>
-                      </select>
-                    </label>
-                  </div>
-                </>
-              )}
               {adminTab === "courses" && (
                 <>
                   <div className="formRowGrid">
