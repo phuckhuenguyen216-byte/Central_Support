@@ -121,17 +121,7 @@ export default function Home() {
                 <select
                   value={selectedRole}
                   onChange={(e) => setSelectedRole(e.target.value)}
-                  style={{
-                    background: 'var(--admin-reset-btn-bg)',
-                    border: '1px solid var(--card-border)',
-                    color: 'var(--title-color)',
-                    fontSize: '10px',
-                    fontWeight: '800',
-                    padding: '3px 8px',
-                    borderRadius: '6px',
-                    outline: 'none',
-                    cursor: 'pointer'
-                  }}
+                  className="roleSelectDropdown"
                 >
                   <option value="Tất cả">{lang === "vi" ? "TẤT CẢ" : "ALL ROLES"}</option>
                   <option value="Sales">SALES</option>
