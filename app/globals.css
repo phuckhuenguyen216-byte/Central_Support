@@ -1369,4 +1369,21 @@ body {
   color: #fff !important;
 }
 
+/* ==========================================================================
+   DROPDOWN OPTIONS THEMING (FIX VISIBILITY ON EDGE/CHROME)
+   ========================================================================== */
+
+select option {
+  background-color: #1e293b !important;
+  color: #ffffff !important;
+  font-weight: 500;
+  padding: 6px;
+}
+
+[data-theme="light"] select option {
+  background-color: #ffffff !important;
+  color: #0f172a !important;
+}
+
+
 
